@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Grocery Delivery Application</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Grocery Delivery Application</h1>
+    <div class="form-container">
+      <button onclick="showForm('register')">Register</button>
+      <button onclick="showForm('login')">Login</button>
+      <button onclick="showForm('order')">Place Order</button>
+      <button onclick="getOrders()">View Orders</button>
+
+      <div id="register-form" class="form">
+        <h2>Register</h2>
+        <input type="text" id="register-username" placeholder="Username">
+        <input type="password" id="register-password" placeholder="Password">
+        <input type="text" id="register-role" placeholder="Role (customer/admin)">
+        <button onclick="register()">Submit</button>
+      </div>
+
+      <div id="login-form" class="form">
+        <h2>Login</h2>
+        <input type="text" id="login-username" placeholder="Username">
+        <input type="password" id="login-password" placeholder="Password">
+        <button onclick="login()">Submit</button>
+      </div>
+
+      <div id="order-form" class="form">
+        <h2>Place Order</h2>
+        <input type="text" id="order-items" placeholder="Items (comma-separated)">
+        <button onclick="placeOrder()">Submit</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function showForm(formId) {
+      document.querySelectorAll('.form').forEach(form => form.style.display = 'none');
+      document.getElementById(`${formId}-form`).style.display = 'block';
+    }
+
+    async function register() {
+      const username = document.getElementById('register-username').value;
+      const password = document.getElementById('register-password').value;
+      const role = document.getElementById('register-role').value;
+      const response = await fetch('/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password, role }),
+      });
+      alert(await response.text());
+    }
+
+    async function login() {
+      const username = document.getElementById('login-username').value;
+      const password = document.getElementById('login-password').value;
+      const response = await fetch('/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      });
+      const data = await response.json();
+      localStorage.setItem('token', data.token);
+      alert('Logged in');
+    }
+
+    async function placeOrder() {
+      const items = document.getElementById('order-items').value.split(',').map(item => item.trim());
+      const token = localStorage.getItem('token');
+      const response = await fetch('/order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(
